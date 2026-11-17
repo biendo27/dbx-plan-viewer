@@ -1,0 +1,57 @@
+SQL Server Plan Viewer for DBX
+==============================
+
+An independent, offline viewer for SQL Server ShowPlan XML. It adds View Plan
+beside the DBX result grid and a standalone workbench for paste and local files.
+No SQL is executed. No database permission, AI service, native sidecar, runtime
+network request, or DBX host modification is needed.
+
+Usage
+-----
+1. Open a result containing complete SQL Server ShowPlan XML and choose View Plan.
+2. Choose the plan cell, then the statement. All supplied matching cells and
+   statements remain selectable, including statements without an operator tree.
+3. Select an operator for XML-derived properties. Use the zoom buttons, Fit,
+   and background dragging to navigate. Source XML shows the original document.
+4. Alternatively open the standalone workbench, then Paste XML or Open file
+   (.sqlplan or .xml).
+
+Cost is estimated subtree cost, not measured elapsed time or a percentage.
+Actual rows are shown only when runtime counters exist. Object/index details
+and predicates come from the supplied XML; missing properties are not inferred.
+DBX passes at most 500 result rows. The viewer reports truncated result context;
+use the original file or paste the full value for omitted/truncated data.
+Limits: 10 MiB per XML document, 5,000 operators, 150,000 XML elements.
+DTD/entity declarations are rejected. Files are processed in memory, not saved.
+
+Installation
+------------
+Build or download the .dbxp package, then open DBX Plugin Center and install the
+local package. An unsigned development package requires Allow unsigned
+development packages. Enable that setting only if you choose to trust this
+source/build. The plugin requests no host permissions.
+
+A GitHub unsigned release is separate from a signed Marketplace listing.
+Marketplace review and signing are controlled by DBX Store maintainers.
+This initial implementation is undergoing verification; a published source tree
+alone does not establish successful desktop installation or Store acceptance.
+
+Development
+-----------
+Requires Node.js/npm and the pinned development dependencies in package-lock.json.
+
+  npm ci
+  npx playwright install chromium
+  npm test
+  npm run build
+  npm run test:browser
+  npm run package
+
+The package includes only manifest.json, assets, and the generated self-contained
+ui/index.html. Test fixtures are synthetic. Never commit live execution plans,
+query results, credentials, or local environment files.
+
+License: MIT (see LICENSE).
+Source: https://github.com/biendo27/dbx-plan-viewer
+DBX plugin contracts: https://dbxio.com/en/docs/plugin-development
+DBX is a separate project; this plugin is not an official DBX or Microsoft product.
