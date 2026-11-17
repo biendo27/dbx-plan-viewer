@@ -25,6 +25,10 @@ Percentages refer to the selected statement, not the batch or elapsed time.
 Missing, zero-denominator or inconsistent inputs display an unavailable value.
 Tiny floating-point rounding differences are tolerated; raw subtree costs remain
 available in Properties.
+The calculation derives from Microsoft's definition of TotalSubtreeCost as the
+cumulative cost of an operation and all its children:
+https://learn.microsoft.com/en-us/sql/t-sql/statements/set-showplan-all-transact-sql
+
 Actual rows are shown only when runtime counters exist. Object/index details
 and predicates come from the supplied XML; missing properties are not inferred.
 DBX passes at most 500 result rows. The viewer reports truncated result context;
