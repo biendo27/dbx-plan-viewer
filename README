@@ -45,8 +45,8 @@ source/build. The plugin requests no host permissions.
 
 A GitHub unsigned release is separate from a signed Marketplace listing.
 Marketplace review and signing are controlled by DBX Store maintainers.
-This initial implementation is undergoing verification; a published source tree
-alone does not establish successful desktop installation or Store acceptance.
+GitHub packages are unsigned review candidates until DBX Store signs and lists
+the plugin; publishing a release does not establish Store acceptance.
 
 Development
 -----------
