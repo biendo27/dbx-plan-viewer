@@ -39,7 +39,7 @@ test('deep chains and many siblings lay out without recursion or overlap', () =>
  const root = {key:'root',children:Array.from({length:100},(_,i) => ({key:`child-${i}`,children:[]}))};
  const result = layoutPlan([root,{key:'other-root',children:[]}]);
  assert.equal(result.positions.length,102); assert.equal(result.edges.length,100);
- const siblings = result.positions.filter(p => p.x === 322); for (let i=1;i<siblings.length;i++) assert.ok(siblings[i].y-siblings[i-1].y >= result.nodeHeight);
+ const siblings = result.positions.filter(p => p.x === 260); for (let i=1;i<siblings.length;i++) assert.ok(siblings[i].y-siblings[i-1].y >= result.nodeHeight);
 });
 test('incomplete runtime rows are unknown rather than a misleading partial sum', () => {
  const parsed = parse(plan.replace('Thread="1" ActualRows="4"','Thread="1" ActualExecutions="1"'));
@@ -50,4 +50,32 @@ test('rejects foreign namespace statements, operators and runtime counters', () 
   const xml = `<ShowPlanXML xmlns="${ns}" xmlns:x="urn:other"><StmtSimple><QueryPlan><RelOp>${foreign}</RelOp></QueryPlan></StmtSimple></ShowPlanXML>`;
   assert.throws(() => parse(xml), /Unsupported XML namespace/);
  }
+});
+const costPlan = (total, body) => parse(`<ShowPlanXML xmlns="${ns}"><StmtSimple ${total === null ? '' : `StatementSubTreeCost="${total}"`}><QueryPlan>${body}</QueryPlan></StmtSimple></ShowPlanXML>`).statements[0];
+const costNode = (cost, children = '') => `<RelOp ${cost === null ? '' : `EstimatedTotalSubtreeCost="${cost}"`}>${children}</RelOp>`;
+test('exclusive cost percentage subtracts immediate children once, scoped to each statement', () => {
+ const statement = costPlan('10',costNode('10',costNode('6',costNode('4')) + costNode('3')));
+ assert.deepEqual(statement.nodes.map(n => n.operatorCost),[1,2,4,3]);
+ assert.deepEqual(statement.nodes.map(n => n.costPercent),[10,20,40,30]);
+ const parsed = parse(plan); assert.ok(Math.abs(parsed.statements[0].nodes[0].costPercent - 100/3) < 1e-10);
+ assert.equal(parsed.statements[2].nodes[0].costPercent,100);
+ assert.equal(parsed.statements[0].nodes[1].statementCost,.3); assert.equal(parsed.statements[2].nodes[0].statementCost,.2);
+});
+test('cost percentages retain legitimate zero and reject unknown or inconsistent inputs', () => {
+ assert.equal(costPlan('1',costNode('0')).nodes[0].costPercent,0);
+ for (const total of [null,'0','-1','NaN']) assert.equal(costPlan(total,costNode('1')).nodes[0].costPercent,null);
+ for (const tree of [costNode(null),costNode('-1'),costNode('2'),costNode('1',costNode(null)),costNode('.5',costNode('.8')),costNode('.8') + costNode('.8')]) assert.equal(costPlan('1',tree).nodes[0].costPercent,null);
+});
+test('cost tolerates only tiny relative serialization rounding and keeps raw costs', () => {
+ const tiny = costPlan('1',costNode('.3',costNode('.30000001'))).nodes[0];
+ assert.equal(tiny.costPercent,0); assert.equal(tiny.attributes.EstimatedTotalSubtreeCost,'.3');
+ assert.equal(costPlan('1',costNode('.3',costNode('.30001'))).nodes[0].costPercent,null);
+ assert.equal(costPlan('1e-12',costNode('1e-13',costNode('2e-13'))).nodes[0].costPercent,null);
+});
+test('cost attributes accept finite decimal/scientific notation, never JS radix syntax', () => {
+ for (const value of ['0x10','0b10','0o10','Infinity','NaN','1_000','1e999','']) {
+  const node = costPlan(value,costNode(value)).nodes[0];
+  assert.equal(node.cost,null); assert.equal(node.costPercent,null); assert.equal(node.attributes.EstimatedTotalSubtreeCost,value);
+ }
+ for (const value of ['1.','.1','+1e-3','1.E+2',' 2.5 ']) assert.equal(costPlan(value,costNode(value)).nodes[0].costPercent,100);
 });

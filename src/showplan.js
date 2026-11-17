@@ -13,7 +13,11 @@ function elements(root) {
   }
   return result;
 }
-function num(value) { const n = value === undefined || value === '' ? NaN : Number(value); return Number.isFinite(n) ? n : null; }
+function num(value) {
+  if (typeof value !== 'string' || !/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/.test(value.trim())) return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
 function owner(el, lookup, stop) {
   for (let p = el.parentNode; p && p !== stop; p = p.parentNode) if (lookup.has(p)) return lookup.get(p);
   return null;
@@ -64,7 +68,30 @@ export function parseShowplan(xml, Parser = globalThis.DOMParser) {
     for (let p = el.parentNode; p && !statementMap.has(p); p = p.parentNode) if (nodeMap.has(p)) { parent = nodeMap.get(p); break; }
     if (parent) parent.children.push(node); else statement.roots.push(node);
   }
+  for (const statement of statementMap.values()) calculateOperatorCosts(statement);
   return { xml, attributes: attrs(root), statements: [...statementMap.values()] };
+}
+// ShowPlan subtree costs are cumulative. Subtract only immediate children so
+// repeated execution estimates remain represented by their source subtree costs.
+function calculateOperatorCosts(statement) {
+  const total = num(statement.attributes.StatementSubTreeCost);
+  statement.cost = total;
+  const epsilon = Math.abs(total || 0) * 1e-6;
+  const known = cost => cost !== null && cost >= 0 && Number.isFinite(cost);
+  const rootSum = statement.roots.reduce((sum, node) => sum + (known(node.cost) ? node.cost : 0), 0);
+  const validTotal = total !== null && total > 0 && Number.isFinite(rootSum) && rootSum <= total + epsilon;
+  for (const node of statement.nodes) {
+    node.statementCost = total;
+    node.operatorCost = null;
+    node.costPercent = null;
+    if (!validTotal || !known(node.cost) || node.cost > total + epsilon || node.children.some(child => !known(child.cost))) continue;
+    const childCost = node.children.reduce((sum, child) => sum + child.cost, 0);
+    const difference = node.cost - childCost;
+    const localEpsilon = Math.max(node.cost, childCost) * 1e-6;
+    if (!Number.isFinite(difference) || difference < -localEpsilon) continue;
+    node.operatorCost = Math.min(total, Math.max(0, difference));
+    node.costPercent = node.operatorCost / total * 100;
+  }
 }
 export function plansFromContext(context) {
   const result = context?.result;
@@ -89,11 +116,11 @@ export function layoutPlan(roots) {
       stack.push({ ...frame, visited: true });
       for (const child of node.children.slice().reverse()) stack.push({ node: child, depth: depth + 1, visited: false });
     } else {
-      const y = node.children.length ? node.children.reduce((sum, child) => sum + placed.get(child.key).y, 0) / node.children.length : 32 + leaf++ * 142;
-      const position = { node, x: 32 + depth * 290, y };
+      const y = node.children.length ? node.children.reduce((sum, child) => sum + placed.get(child.key).y, 0) / node.children.length : 24 + leaf++ * 176;
+      const position = { node, x: 24 + depth * 236, y };
       placed.set(node.key, position); positions.push(position); maxDepth = Math.max(maxDepth, depth);
       for (const child of node.children) edges.push({ from: placed.get(child.key), to: position });
     }
   }
-  return { positions, edges, width: (maxDepth + 1) * 290 + 40, height: Math.max(240, leaf * 142 + 64), nodeWidth: 220, nodeHeight: 108 };
+  return { positions, edges, width: maxDepth * 236 + 256, height: leaf * 176 + 24, nodeWidth: 208, nodeHeight: 152 };
 }

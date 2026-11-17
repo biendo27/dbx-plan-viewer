@@ -46,3 +46,19 @@ for (const shape of ['wide','deep']) test(`Fit contains all rendered operators i
  expect(await contained()).toBeTruthy(); await page.getByRole('button',{name:'Zoom out',exact:true}).click(); expect(await contained()).toBeTruthy();
  await page.getByRole('button',{name:'Zoom in',exact:true}).click(); await page.getByRole('button',{name:'Fit',exact:true}).click(); expect(await contained()).toBeTruthy();
 });
+test('Studio selects a meaningful operator and displays exclusive statement percentages', async ({page}) => {
+ await open(page); await paste(page);
+ await expect(page.getByRole('heading',{name:'SQL Plan Viewer',exact:true})).toBeVisible();
+ await expect(page.locator('.node.selected')).toHaveAttribute('aria-label',/Index Seek.*66\.7%/);
+ await expect(page.locator('#properties')).toContainText('Estimated operator cost (% of statement)66.7%');
+ await page.locator('.node').filter({hasText:'Filter'}).click();
+ await expect(page.locator('#properties')).toContainText('Estimated operator cost (% of statement)33.3%');
+ await expect(page.locator('#properties')).toContainText('StatementSubTreeCost (denominator)0.3');
+ await page.locator('#statement-choice').selectOption('2'); await expect(page.locator('.node.selected')).toHaveAttribute('aria-label',/100%/);
+ await page.addStyleTag({content:'body,button,select { font-family: monospace !important; }'});
+ for (const selector of ['body','h1','button','select']) expect(await page.locator(selector).first().evaluate(el=>getComputedStyle(el).fontFamily)).toContain('system-ui');
+});
+test('distinguishes tiny positive estimated costs from true zero',async ({page}) => {
+ await open(page); const xml = '<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan"><StmtSimple StatementSubTreeCost="1"><QueryPlan><RelOp PhysicalOp="Filter" EstimatedTotalSubtreeCost="1"><RelOp PhysicalOp="Tiny" EstimatedTotalSubtreeCost="0.0001"/><RelOp PhysicalOp="Zero" EstimatedTotalSubtreeCost="0"/></RelOp></QueryPlan></StmtSimple></ShowPlanXML>';
+ await paste(page,xml); await expect(page.locator('.node').filter({hasText:'Tiny'})).toContainText('Est. cost <0.1%'); await expect(page.locator('.node').filter({hasText:'Zero'})).toContainText('Est. cost 0%');
+});
