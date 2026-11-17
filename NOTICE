@@ -1,0 +1,7 @@
+SQL Server Plan Viewer was bootstrapped with @dbx-app/plugin-cli 0.1.10,
+from https://github.com/t8y2/dbx, licensed under Apache License 2.0.
+The initial scaffold supplied plugin configuration and the original demo icon.
+The product interface, parser, application logic, tests, and replacement graph
+icon are maintained here. Retained scaffold provenance is covered by the
+included LICENSE-DBX-CLI. Project-specific code is under the included MIT LICENSE.
+No Microsoft or DBX endorsement is implied.
