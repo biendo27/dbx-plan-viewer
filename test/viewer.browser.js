@@ -37,3 +37,12 @@ test('treats SQL and property markup as text and preserves source dollar sequenc
  await page.locator('.sql-preview summary').click(); await expect(page.locator('#statement-sql')).toHaveText('SELECT $& <img src=x onerror=alert(1)>'); await expect(page.locator('#statement-sql img')).toHaveCount(0);
  await page.getByRole('button',{name:'Paste XML',exact:true}).hover(); await page.getByRole('button',{name:'Paste XML',exact:true}).click(); await expect(page.locator('#paste-dialog')).toBeVisible(); await page.screenshot({path:'test-results/paste-overlay.png'}); await page.getByRole('button',{name:'Cancel',exact:true}).click();
 });
+for (const shape of ['wide','deep']) test(`Fit contains all rendered operators in a large ${shape} tree`,async ({page}) => {
+ await page.setViewportSize({width:375,height:900}); await open(page);
+ const operators = shape === 'wide' ? `<RelOp>${'<RelOp/>'.repeat(500)}</RelOp>` : '<RelOp>'.repeat(501) + '</RelOp>'.repeat(501);
+ await paste(page,`<ShowPlanXML xmlns="http://schemas.microsoft.com/sqlserver/2004/07/showplan"><StmtSimple><QueryPlan>${operators}</QueryPlan></StmtSimple></ShowPlanXML>`);
+ await expect(page.locator('.node')).toHaveCount(501); await page.getByRole('button',{name:'Fit',exact:true}).click();
+ const contained = () => page.evaluate(() => {const canvas = document.getElementById('canvas').getBoundingClientRect(); return [...document.querySelectorAll('.node rect')].every(el => {const r = el.getBoundingClientRect(); return r.left >= canvas.left && r.right <= canvas.right && r.top >= canvas.top && r.bottom <= canvas.bottom;});});
+ expect(await contained()).toBeTruthy(); await page.getByRole('button',{name:'Zoom out',exact:true}).click(); expect(await contained()).toBeTruthy();
+ await page.getByRole('button',{name:'Zoom in',exact:true}).click(); await page.getByRole('button',{name:'Fit',exact:true}).click(); expect(await contained()).toBeTruthy();
+});

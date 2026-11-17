@@ -42,6 +42,7 @@ export function parseShowplan(xml, Parser = globalThis.DOMParser) {
   const root = document.documentElement;
   if (name(root) !== 'ShowPlanXML' || root.namespaceURI !== NS) throw new Error('This is not a SQL Server ShowPlan XML document.');
   const all = elements(root);
+  if (all.some(el => el.namespaceURI !== NS)) throw new Error('Unsupported XML namespace inside the plan. Supply SQL Server ShowPlan XML only.');
   const statementElements = all.filter(e => /^Stmt/.test(name(e)));
   if (!statementElements.length) throw new Error('The XML contains no SQL statements.');
   const statementMap = new Map(statementElements.map((el, index) => [el, { key: `statement-${index}`, attributes: attrs(el), text: el.getAttribute('StatementText') || '(SQL text unavailable)', type: el.getAttribute('StatementType') || name(el), roots: [], nodes: [] }]));

@@ -1,7 +1,7 @@
 import { parseShowplan, plansFromContext, layoutPlan, MAX_BYTES } from './showplan.js';
 const $ = id => document.getElementById(id);
 const svgNS = 'http://www.w3.org/2000/svg';
-let plans = [], current, layout, layer, scale = 1, offset = { x: 0, y: 0 }, loadVersion = 0, sourceNotice = '';
+let plans = [], current, layout, layer, scale = 1, minimumScale = .02, offset = { x: 0, y: 0 }, loadVersion = 0, sourceNotice = '';
 const format = n => n === null ? 'Not supplied' : new Intl.NumberFormat('en', { maximumSignificantDigits: 6 }).format(n);
 function text(tag, value, parent) { const el = document.createElement(tag); el.textContent = value; parent?.append(el); return el; }
 function svg(tag, attributes, parent) { const el = document.createElementNS(svgNS, tag); for (const [k,v] of Object.entries(attributes)) el.setAttribute(k,v); parent?.append(el); return el; }
@@ -28,9 +28,9 @@ function showPlan() {
     if (plans.length > 1) { $('viewer').hidden = false; $('empty').hidden = true; options($('statement-choice'), []); $('counts').textContent = ''; $('plan-kind').textContent = ''; $('no-operators').hidden = true; }
   }
 }
-function transform() { if (layer) layer.setAttribute('transform', `translate(${offset.x} ${offset.y}) scale(${scale})`); $('zoom-level').textContent = `${Math.round(scale * 100)}%`; }
-function fit() { if (!layout) return; const box = $('canvas').getBoundingClientRect(); scale = Math.max(.02, Math.min(1, (box.width - 32) / layout.width, (box.height - 32) / layout.height)); offset = { x: (box.width - layout.width * scale) / 2, y: (box.height - layout.height * scale) / 2 }; transform(); }
-function zoom(factor) { const box = $('canvas').getBoundingClientRect(); const next = Math.max(.02, Math.min(4, scale * factor)); offset = { x: box.width / 2 - (box.width / 2 - offset.x) * next / scale, y: box.height / 2 - (box.height / 2 - offset.y) * next / scale }; scale = next; transform(); }
+function transform() { if (layer) layer.setAttribute('transform', `translate(${offset.x} ${offset.y}) scale(${scale})`); $('zoom-level').textContent = `${(scale < .01 ? (scale * 100).toFixed(2) : Math.round(scale * 100))}%`; }
+function fit() { if (!layout) return; const box = $('canvas').getBoundingClientRect(); if (box.width <= 32 || box.height <= 32) return; scale = Math.min(1, (box.width - 32) / layout.width, (box.height - 32) / layout.height); minimumScale = Math.min(.02, scale); offset = { x: (box.width - layout.width * scale) / 2, y: (box.height - layout.height * scale) / 2 }; transform(); }
+function zoom(factor) { const box = $('canvas').getBoundingClientRect(); const next = Math.max(minimumScale, Math.min(4, scale * factor)); offset = { x: box.width / 2 - (box.width / 2 - offset.x) * next / scale, y: box.height / 2 - (box.height / 2 - offset.y) * next / scale }; scale = next; transform(); }
 function properties(node) {
   const panel = $('properties'); panel.replaceChildren(); text('h3', node.operator, panel);
   const list = text('dl', '', panel);

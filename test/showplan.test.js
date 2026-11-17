@@ -45,3 +45,9 @@ test('incomplete runtime rows are unknown rather than a misleading partial sum',
  const parsed = parse(plan.replace('Thread="1" ActualRows="4"','Thread="1" ActualExecutions="1"'));
  assert.equal(parsed.statements[0].nodes[1].actualRows,null);
 });
+test('rejects foreign namespace statements, operators and runtime counters', () => {
+ for (const foreign of ['<x:StmtSimple><x:RelOp/></x:StmtSimple>', '<x:RelOp/>', '<x:RunTimeCountersPerThread ActualRows="999"/>']) {
+  const xml = `<ShowPlanXML xmlns="${ns}" xmlns:x="urn:other"><StmtSimple><QueryPlan><RelOp>${foreign}</RelOp></QueryPlan></StmtSimple></ShowPlanXML>`;
+  assert.throws(() => parse(xml), /Unsupported XML namespace/);
+ }
+});
