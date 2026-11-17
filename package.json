@@ -1,1 +1,19 @@
-{"name":"dbx-plan-viewer","version":"0.1.0","private":true,"type":"module","scripts":{"build":"node scripts/build.mjs","test":"node --test test/*.test.js","test:browser":"playwright test","check":"npm test && npm run build && npm run test:browser","package":"dbx-plugin package . --target universal"},"devDependencies":{"@dbx-app/plugin-cli":"0.1.10","@playwright/test":"1.65.1","@xmldom/xmldom":"0.9.12","esbuild":"0.28.2"}}
+{
+  "name": "dbx-plan-viewer",
+  "version": "0.1.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test test/*.test.js",
+    "test:browser": "playwright test",
+    "check": "npm test && npm run build && npm run test:browser",
+    "package": "dbx-plugin package . --target universal"
+  },
+  "devDependencies": {
+    "@dbx-app/plugin-cli": "0.1.10",
+    "@playwright/test": "1.65.1",
+    "@xmldom/xmldom": "0.9.12",
+    "esbuild": "0.28.2"
+  }
+}

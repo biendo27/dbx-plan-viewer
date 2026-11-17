@@ -1,4 +1,4 @@
-SQL Server Plan Viewer for DBX
+SQL Plan Viewer for DBX
 ==============================
 
 An independent, offline viewer for SQL Server ShowPlan XML. It adds View Plan
@@ -16,7 +16,15 @@ Usage
 4. Alternatively open the standalone workbench, then Paste XML or Open file
    (.sqlplan or .xml).
 
-Cost is estimated subtree cost, not measured elapsed time or a percentage.
+The Studio interface keeps controls compact, operator properties on the right,
+and zoom/Fit at the bottom of the canvas. This version supports SQL Server only.
+
+Estimated operator cost = node subtree cost minus immediate-child subtree costs.
+Cost (%) = estimated operator cost / owning statement StatementSubTreeCost * 100.
+Percentages refer to the selected statement, not the batch or elapsed time.
+Missing, zero-denominator or inconsistent inputs display an unavailable value.
+Tiny floating-point rounding differences are tolerated; raw subtree costs remain
+available in Properties.
 Actual rows are shown only when runtime counters exist. Object/index details
 and predicates come from the supplied XML; missing properties are not inferred.
 DBX passes at most 500 result rows. The viewer reports truncated result context;
@@ -47,8 +55,8 @@ Requires Node.js/npm and the pinned development dependencies in package-lock.jso
   npm run test:browser
   npm run package
 
-The package includes only manifest.json, assets, and the generated self-contained
-ui/index.html. Test fixtures are synthetic. Never commit live execution plans,
+The package includes manifest.json, assets, licenses/notices, checksums, and the
+generated self-contained ui/index.html. Test fixtures are synthetic. Never commit live execution plans,
 query results, credentials, or local environment files.
 
 License: MIT (see LICENSE).

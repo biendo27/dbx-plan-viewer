@@ -2,8 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/t8y2/dbx/main/plugins/manifest.schema.json",
   "manifest_version": 1,
   "id": "io.github.biendo27.plan-viewer",
-  "name": "SQL Server Plan Viewer",
-  "version": "0.1.0",
+  "name": "SQL Plan Viewer",
+  "version": "0.1.1",
   "publisher": "biendo27",
   "description": "View SQL Server ShowPlan XML from query results, pasted text, or local files.",
   "icon": "assets/plugin.svg",
@@ -22,7 +22,7 @@
     {
       "type": "workbench",
       "id": "io.github.biendo27.plan-viewer.workbench",
-      "label": "SQL Server Plan Viewer",
+      "label": "SQL Plan Viewer",
       "description": "View SQL Server ShowPlan XML from query results, pasted text, or local files.",
       "icon": "assets/plugin.svg"
     },
