@@ -1,0 +1,15 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SQL Server Plan Viewer</title><style>/* STYLES */</style></head><body>
+<header><div class="identity"><span class="logo" aria-hidden="true">⑂</span><div><h1>SQL Server Plan Viewer</h1><p>Read the plan. Follow the data.</p></div></div><div class="actions"><button id="paste">Paste XML</button><button id="open-file">Open file</button><input type="file" id="file" accept=".sqlplan,.xml,text/xml,application/xml" hidden></div></header>
+<main>
+<div id="notice" role="status" hidden></div>
+<section id="empty"><span class="empty-icon" aria-hidden="true">⑂</span><h2>Your execution plan, inside DBX.</h2><p>Run a query that returns ShowPlan XML, then choose <strong>View Plan</strong> beside the result grid.</p><p>Or use <strong>Paste XML</strong> or <strong>Open file</strong> above.</p><small>SQL Server · .sqlplan / .xml · Up to 10 MiB<br>Processed locally. No SQL is executed.</small></section>
+<section id="viewer" hidden>
+<div class="selectors"><label>Plan<select id="plan-choice"></select></label><label>Statement<select id="statement-choice"></select></label><span id="plan-kind" class="badge"></span></div>
+<details class="sql-preview"><summary id="sql-summary">Statement SQL</summary><pre id="statement-sql"></pre></details>
+<div class="toolbar"><div class="actions" role="group" aria-label="View"><button id="diagram-tab" aria-pressed="true">Diagram</button><button id="xml-tab" aria-pressed="false">Source XML</button></div><p id="counts"></p><div class="actions" id="zoom-tools"><button id="zoom-out" aria-label="Zoom out">−</button><span id="zoom-level">100%</span><button id="zoom-in" aria-label="Zoom in">+</button><button id="fit">Fit</button></div></div>
+<div id="diagram-view"><div class="canvas-wrap"><div id="canvas" aria-label="Execution plan diagram. Drag the background to pan; use the zoom buttons to resize."><svg id="graph" xmlns="http://www.w3.org/2000/svg" aria-label="Execution plan"></svg><p id="no-operators" hidden>This statement has no relational operator tree in the supplied XML.</p></div><p class="canvas-caption">Data flows right to left · Cost is estimated subtree cost · Select an operator for details</p></div><aside id="inspector" aria-label="Operator properties"><h2>Properties</h2><div id="properties"><p>Select an operator to inspect its properties.</p></div></aside></div>
+<pre id="xml-view" tabindex="0" aria-label="Original ShowPlan XML" hidden></pre>
+</section>
+</main>
+<dialog id="paste-dialog" aria-labelledby="paste-heading"><form id="paste-form"><h2 id="paste-heading">Paste ShowPlan XML</h2><p>Paste the full XML value, from &lt;ShowPlanXML&gt; to &lt;/ShowPlanXML&gt;.</p><label for="xml-input">XML document</label><textarea id="xml-input" spellcheck="false" required></textarea><div class="actions"><button type="button" id="cancel-paste">Cancel</button><button class="primary" type="submit">View Plan</button></div></form></dialog>
+<script>/* SCRIPT */</script></body></html>

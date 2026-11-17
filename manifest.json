@@ -1,0 +1,52 @@
+{
+  "$schema": "https://raw.githubusercontent.com/t8y2/dbx/main/plugins/manifest.schema.json",
+  "manifest_version": 1,
+  "id": "io.github.biendo27.plan-viewer",
+  "name": "SQL Server Plan Viewer",
+  "version": "0.1.0",
+  "publisher": "biendo27",
+  "description": "View SQL Server ShowPlan XML from query results, pasted text, or local files.",
+  "icon": "assets/plugin.svg",
+  "permissions": ["host.ai"],
+  "engines": {
+    "dbx": ">=0.5.68",
+    "host_api": "1"
+  },
+  "entrypoints": {
+    "ui": {
+      "root": "ui",
+      "entry": "ui/index.html"
+    }
+  },
+  "contributions": [
+    {
+      "type": "workbench",
+      "id": "io.github.biendo27.plan-viewer.workbench",
+      "label": "SQL Server Plan Viewer",
+      "description": "Sandboxed frontend workbench contributed by SQL Server Plan Viewer.",
+      "icon": "assets/plugin.svg",
+      "ai": {
+        "recommendations": [
+          {
+            "id": "inspect-context",
+            "label": "Inspect current workbench",
+            "prompt": "Analyze the current workbench context and list the most important risks.",
+            "order": 10
+          }
+        ]
+      }
+    }
+  ],
+  "localizations": {
+    "zh-CN": {
+      "name": "SQL Server Plan Viewer",
+      "description": "View SQL Server ShowPlan XML from query results, pasted text, or local files.",
+      "contributions": {
+        "io.github.biendo27.plan-viewer.workbench": {
+          "label": "SQL Server Plan Viewer",
+          "description": "由插件提供的沙箱前端工作台。"
+        }
+      }
+    }
+  }
+}
