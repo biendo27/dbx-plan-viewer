@@ -9,7 +9,7 @@ function elements(root) {
   while (stack.length) {
     const el = stack.pop(); result.push(el);
     if (result.length > 150000) throw new Error('Plan has too many XML elements. Open a smaller plan.');
-    stack.push(...children(el).reverse());
+    for (const child of children(el).reverse()) stack.push(child);
   }
   return result;
 }
@@ -22,7 +22,7 @@ function localDetails(el) {
   const details = [], objects = [], counters = [], stack = children(el).reverse().map(e => [e, name(e)]);
   while (stack.length) {
     const [item, path] = stack.pop();
-    if (name(item) === 'RelOp') continue;
+    if (name(item) === 'RelOp' || /^Stmt/.test(name(item))) continue;
     const values = attrs(item);
     if (Object.keys(values).length) details.push({ path, values });
     if (name(item) === 'Object') objects.push(values);
@@ -42,7 +42,7 @@ export function parseShowplan(xml, Parser = globalThis.DOMParser) {
   const root = document.documentElement;
   if (name(root) !== 'ShowPlanXML' || root.namespaceURI !== NS) throw new Error('This is not a SQL Server ShowPlan XML document.');
   const all = elements(root);
-  const statementElements = all.filter(e => /^Stmt/.test(name(e)) && (e.hasAttribute('StatementText') || e.hasAttribute('StatementType')));
+  const statementElements = all.filter(e => /^Stmt/.test(name(e)));
   if (!statementElements.length) throw new Error('The XML contains no SQL statements.');
   const statementMap = new Map(statementElements.map((el, index) => [el, { key: `statement-${index}`, attributes: attrs(el), text: el.getAttribute('StatementText') || '(SQL text unavailable)', type: el.getAttribute('StatementType') || name(el), roots: [], nodes: [] }]));
   const relOps = all.filter(e => name(e) === 'RelOp');
@@ -53,7 +53,7 @@ export function parseShowplan(xml, Parser = globalThis.DOMParser) {
     if (!statement) continue;
     const attributes = attrs(el), local = localDetails(el);
     const actualRows = local.counters.length && local.counters.every(c => num(c.ActualRows) !== null) ? local.counters.reduce((n, c) => n + Number(c.ActualRows), 0) : null;
-    const node = { key: `node-${index}`, attributes, ...local, operator: attributes.PhysicalOp || attributes.LogicalOp || 'Operator', estimatedRows: num(attributes.EstimateRows), actualRows, cost: num(attributes.EstimatedTotalSubtreeCost), children: [] };
+    const node = { key: `node-${index}`, attributes, ...local, operator: local.details.some(d => d.values.Lookup === '1' || d.values.Lookup === 'true') ? (attributes.PhysicalOp === 'Clustered Index Seek' ? 'Key Lookup' : attributes.PhysicalOp || 'Lookup') : attributes.PhysicalOp || attributes.LogicalOp || 'Operator', estimatedRows: num(attributes.EstimateRows), actualRows, cost: num(attributes.EstimatedTotalSubtreeCost), children: [] };
     nodeMap.set(el, node); statement.nodes.push(node);
   }
   for (const [el, node] of nodeMap) {

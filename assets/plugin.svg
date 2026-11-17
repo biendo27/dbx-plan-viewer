@@ -1,10 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="SQL Server Plan Viewer">
-  <defs>
-    <linearGradient id="g" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#6d5dfc"/>
-      <stop offset="1" stop-color="#2cc9a7"/>
-    </linearGradient>
-  </defs>
-  <rect width="64" height="64" rx="16" fill="url(#g)"/>
-  <path fill="#fff" d="M20 18h18a10 10 0 0 1 0 20H28v8h-8V18Zm8 8v4h10a2 2 0 1 0 0-4H28Z"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="#265cc4"/><g fill="none" stroke="#fff" stroke-width="3" stroke-linejoin="round"><rect x="8" y="24" width="16" height="16" rx="3"/><rect x="40" y="8" width="16" height="16" rx="3"/><rect x="40" y="40" width="16" height="16" rx="3"/><path d="M40 16h-8v32h8M32 32H24m4-4-4 4 4 4"/></g></svg>
