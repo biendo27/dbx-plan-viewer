@@ -4,5 +4,5 @@ const bundle = await build({ entryPoints: ['src/app.js'], bundle: true, write: f
 const html = await readFile('src/index.html', 'utf8');
 const css = await readFile('src/style.css', 'utf8');
 await mkdir('ui', {recursive: true});
-await writeFile('ui/index.html', html.replace('/* STYLES */', css).replace('/* SCRIPT */', bundle.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')));
+await writeFile('ui/index.html', html.replace('/* STYLES */', () => css).replace('/* SCRIPT */', () => bundle.outputFiles[0].text.replace(/<\/script/gi, '<\\/script')));
 console.log('DBX_UI_BUILD_SUCCESS');
